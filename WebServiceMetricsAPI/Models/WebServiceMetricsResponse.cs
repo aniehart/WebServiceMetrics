@@ -9,5 +9,6 @@ namespace WebServiceMetricsAPI.Models
     public class WebServiceMetricsResponse
     {
         public string timeElapsedInSeconds { get; set; }
+        public string errorMessage { get; set; }
     }
 }

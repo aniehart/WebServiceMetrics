@@ -11,13 +11,13 @@ namespace WebServiceMetricsAPI.BusinessLogic
     using System.Text;
     using Entities;
     using Repositories;
+    using System.Threading;
+    using System.Net;
 
     public class MetricsManager
     {
         public async Task<List<WebServiceMetricsResponse>> RunMetrics(WebServiceMetricsRequest request)
         {
-            var httpClient = new HttpClient();
-            var uri = new Uri(request.RequestUrl);
             var response = new List<WebServiceMetricsResponse>();
 
             var metricsRunEntity = new MetricsRun()
@@ -32,17 +32,35 @@ namespace WebServiceMetricsAPI.BusinessLogic
                 metricsRunEntity = await repository.SaveMetricsRun(metricsRunEntity);
             }
 
-            for (int i = 1; i <= request.NumberOfRequestsToSend; i++)
+            var tasks = new List<Task>();
+            using (var semaphore = new SemaphoreSlim(10))
             {
+                for(int i = 0; i < request.NumberOfRequestsToSend; i++) 
+                {
+                    await semaphore.WaitAsync();
+                    tasks.Add(SendRequest(semaphore, request, response, metricsRunEntity.MetricRunId));
+                }
+                await Task.WhenAll(tasks);
+            }
+
+            return response;
+        }
+        private static async Task SendRequest(SemaphoreSlim semaphore, WebServiceMetricsRequest request, List<WebServiceMetricsResponse> response, int metricRunId)
+        {
+            try
+            {
+                var httpClient = new HttpClient();
+                var uri = new Uri(request.RequestUrl);
                 var sw = new Stopwatch();
+
                 sw.Start();
                 var wsResponse = await httpClient.PostAsync(uri, new StringContent(request.RequestBody, Encoding.Unicode, "application/json"));
                 sw.Stop();
 
                 var metricsResultEntity = new MetricsResult()
                 {
-                    MetricsRunId = metricsRunEntity.MetricRunId,
-                    TimeElapsedInMilliseconds = (int) sw.ElapsedMilliseconds,
+                    MetricsRunId = metricRunId,
+                    TimeElapsedInMilliseconds = (int)sw.ElapsedMilliseconds,
                     Result = wsResponse.StatusCode.ToString()
                 };
 
@@ -56,11 +74,18 @@ namespace WebServiceMetricsAPI.BusinessLogic
                 {
                     timeElapsedInSeconds = sw.ElapsedMilliseconds.ToString()
                 });
-
-                //create MetricsResults
             }
-
-            return response;
+            catch (Exception ex)
+            {
+               response.Add(new WebServiceMetricsResponse()
+               {
+                   errorMessage = ex.Message
+               });
+            }
+            finally
+            {
+                semaphore.Release();
+            }
         }
     }
 }
