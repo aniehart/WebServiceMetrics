@@ -10,6 +10,7 @@ namespace WebServiceMetricsAPI.Controllers
     using System.Net;
     using System.Net.Http;
     using System.Text;
+    using BusinessLogic;
     using Microsoft.AspNetCore.Http;
     using Models;
     using Newtonsoft.Json;
@@ -25,22 +26,8 @@ namespace WebServiceMetricsAPI.Controllers
             try
             {
                 var response = new List<WebServiceMetricsResponse>();
-                var httpClient = new HttpClient();
-                var uri = new Uri(request.RequestUrl);
-
-                for (int i = 1; i <= request.NumberOfRequestsToSend; i++)
-                {
-                    var sw = new Stopwatch();
-                    sw.Start();
-                    var wsResponse = await httpClient.PostAsync(uri, new StringContent(request.RequestBody, Encoding.Unicode, "application/json"));
-                    sw.Stop();
-
-                    response.Add(new WebServiceMetricsResponse
-                    {
-                        timeElapsedInSeconds = sw.ElapsedMilliseconds.ToString()
-                    });
-                }
-
+                var metricsManager = new MetricsManager();
+                response = await metricsManager.RunMetrics(request);
                 return Content(JsonConvert.SerializeObject(response), "application/json");
             }
             catch (Exception ex)

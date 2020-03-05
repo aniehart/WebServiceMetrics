@@ -12,6 +12,11 @@ namespace WebServiceMetricsAPI.DataAccess
 
     public class MetricsContext : DbContext
     {
+        public MetricsContext() { }
+        public MetricsContext(DbContextOptions options) : base(options)
+        {
+
+        }
         public DbSet<MetricsResult> MetricsResults { get; set; }
         public DbSet<MetricsRun> MetricsRuns { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
