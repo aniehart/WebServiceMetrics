@@ -26,13 +26,13 @@ namespace WebServiceMetricsAPI.Controllers
             {
                 var response = new List<WebServiceMetricsResponse>();
                 var httpClient = new HttpClient();
-                var uri = new Uri(request.RestEndpointToPost);
+                var uri = new Uri(request.RequestUrl);
 
-                for (int i = 1; i <= request.NumberOfRequestsToMake; i++)
+                for (int i = 1; i <= request.NumberOfRequestsToSend; i++)
                 {
                     var sw = new Stopwatch();
                     sw.Start();
-                    var wsResponse = await httpClient.PostAsync(uri, new StringContent(request.RequestBodyToSend, Encoding.Unicode, "application/json"));
+                    var wsResponse = await httpClient.PostAsync(uri, new StringContent(request.RequestBody, Encoding.Unicode, "application/json"));
                     sw.Stop();
 
                     response.Add(new WebServiceMetricsResponse
