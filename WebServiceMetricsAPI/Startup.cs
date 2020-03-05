@@ -13,6 +13,9 @@ using Microsoft.Extensions.Options;
 
 namespace WebServiceMetricsAPI
 {
+    using DataAccess;
+    using Microsoft.EntityFrameworkCore;
+
     public class Startup
     {
         public Startup(IConfiguration configuration)
@@ -26,6 +29,11 @@ namespace WebServiceMetricsAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            services.AddDbContext<MetricsContext>(options => 
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("MetricsDatabase"));
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
