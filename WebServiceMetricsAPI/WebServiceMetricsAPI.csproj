@@ -5,8 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Repositories\" />
     <Folder Include="wwwroot\" />
+    <Folder Include="Repositories\" ></Folder>
   </ItemGroup>
 
   <ItemGroup>
