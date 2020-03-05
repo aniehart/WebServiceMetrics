@@ -8,6 +8,7 @@ namespace WebServiceMetricsAPI.DataAccess
     using Entities;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
+    using System.IO;
 
     public class MetricsContext : DbContext
     {
@@ -15,7 +16,14 @@ namespace WebServiceMetricsAPI.DataAccess
         public DbSet<MetricsRun> MetricsRuns { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(@"Server=localhost;Database=WebServiceMetrics;Trusted_Connection=True;");
+            var builder = new ConfigurationBuilder()
+                          .SetBasePath(Directory.GetCurrentDirectory())
+                          .AddJsonFile("appsettings.json");
+
+            var configuration = builder.Build();
+            var connectionString = configuration.GetConnectionString("MetricsDatabase");
+            //optionsBuilder.UseSqlServer(@"Server=localhost;Database=WebServiceMetrics;Trusted_Connection=True;");
+            optionsBuilder.UseSqlServer(connectionString);
         }
     }
 }
