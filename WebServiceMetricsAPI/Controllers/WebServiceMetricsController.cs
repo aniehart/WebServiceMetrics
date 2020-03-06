@@ -1,20 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using WebServiceMetricsAPI.BusinessLogic;
+using WebServiceMetricsAPI.Models;
+using Newtonsoft.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebServiceMetricsAPI.Controllers
 {
-    using System.Diagnostics;
-    using System.Net;
-    using System.Net.Http;
-    using System.Text;
-    using BusinessLogic;
-    using Microsoft.AspNetCore.Http;
-    using Models;
-    using Newtonsoft.Json;
-
     [Route("api/[controller]")]
     [ApiController]
     public class WebServiceMetricsController : ControllerBase
@@ -27,8 +19,7 @@ namespace WebServiceMetricsAPI.Controllers
             {
                 var response = new WebServiceMetricsResponse();
                 var metricsManager = new MetricsManager();
-                response = await metricsManager.RunMetrics(request);
-                return Content(JsonConvert.SerializeObject(response), "application/json");
+                return Content(JsonConvert.SerializeObject(await metricsManager.RunMetrics(request)), "application/json");
             }
             catch (Exception ex)
             {

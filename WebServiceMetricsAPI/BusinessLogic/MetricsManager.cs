@@ -1,24 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using WebServiceMetricsAPI.Models;
+using System.Diagnostics;
+using System.Text;
+using WebServiceMetricsAPI.Entities;
+using WebServiceMetricsAPI.Repositories;
+using System.Threading;
 
 namespace WebServiceMetricsAPI.BusinessLogic
 {
-    using Models;
-    using System.Diagnostics;
-    using System.Text;
-    using Entities;
-    using Repositories;
-    using System.Threading;
-    using System.Net;
-
     public class MetricsManager
     {
         public async Task<WebServiceMetricsResponse> RunMetrics(WebServiceMetricsRequest request)
         {
             var response = new WebServiceMetricsResponse();
+            response.WebServiceMetricsRequestMeasured = request;
 
             var metricsRunEntity = new MetricsRun()
             {

@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using WebServiceMetricsAPI.DataAccess;
+using WebServiceMetricsAPI.Entities;
 
 namespace WebServiceMetricsAPI.Repositories
 {
-    using DataAccess;
-    using Entities;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Migrations;
-
     public class MetricsRepository : RepositoryBase<MetricsContext>
     {
         public async Task<MetricsRun> SaveMetricsRun(MetricsRun metricsRunEntity)

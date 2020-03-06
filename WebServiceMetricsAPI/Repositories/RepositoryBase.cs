@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebServiceMetricsAPI.Repositories
 {
-    using Microsoft.EntityFrameworkCore;
-
     public abstract class RepositoryBase<T> : IDisposable where T : DbContext, new()
     {
         internal DbContext _context;
