@@ -16,9 +16,9 @@ namespace WebServiceMetricsAPI.BusinessLogic
 
     public class MetricsManager
     {
-        public async Task<List<WebServiceMetricsResponse>> RunMetrics(WebServiceMetricsRequest request)
+        public async Task<WebServiceMetricsResponse> RunMetrics(WebServiceMetricsRequest request)
         {
-            var response = new List<WebServiceMetricsResponse>();
+            var response = new WebServiceMetricsResponse();
 
             var metricsRunEntity = new MetricsRun()
             {
@@ -32,20 +32,22 @@ namespace WebServiceMetricsAPI.BusinessLogic
                 metricsRunEntity = await repository.SaveMetricsRun(metricsRunEntity);
             }
 
+            response.WebServiceMetricsRunId = metricsRunEntity.MetricRunId;
+
             var tasks = new List<Task>();
             using (var semaphore = new SemaphoreSlim(10))
             {
                 for(int i = 0; i < request.NumberOfRequestsToSend; i++) 
                 {
                     await semaphore.WaitAsync();
-                    tasks.Add(SendRequest(semaphore, request, response, metricsRunEntity.MetricRunId));
+                    tasks.Add(MeasureRequest(semaphore, request, response, metricsRunEntity.MetricRunId));
                 }
                 await Task.WhenAll(tasks);
             }
 
             return response;
         }
-        private static async Task SendRequest(SemaphoreSlim semaphore, WebServiceMetricsRequest request, List<WebServiceMetricsResponse> response, int metricRunId)
+        private static async Task MeasureRequest(SemaphoreSlim semaphore, WebServiceMetricsRequest request, WebServiceMetricsResponse response, int metricRunId)
         {
             try
             {
@@ -67,19 +69,19 @@ namespace WebServiceMetricsAPI.BusinessLogic
                 //use separate repository each time since .NET/EF Core cannot multi-thread the same DbContext...
                 using (var repository = new MetricsRepository())
                 {
-                    metricsResultEntity = await repository.SaveMetricsResult(metricsResultEntity);
+                    await repository.SaveMetricsResult(metricsResultEntity);
                 }
 
-                response.Add(new WebServiceMetricsResponse
+                response.WebServiceMetricsResults.Add(new WebServiceMetricsResult
                 {
-                    timeElapsedInSeconds = sw.ElapsedMilliseconds.ToString()
+                    TimeElapsedInMilliseconds = metricsResultEntity.TimeElapsedInMilliseconds.ToString()
                 });
             }
             catch (Exception ex)
             {
-               response.Add(new WebServiceMetricsResponse()
+               response.WebServiceMetricsResults.Add(new WebServiceMetricsResult()
                {
-                   errorMessage = ex.Message
+                   ErrorMessage = ex.Message
                });
             }
             finally

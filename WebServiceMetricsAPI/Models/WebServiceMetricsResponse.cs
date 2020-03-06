@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace WebServiceMetricsAPI.Models
 {
+    using System.Collections.Generic;
+
     [Serializable]
     public class WebServiceMetricsResponse
     {
-        public string timeElapsedInSeconds { get; set; }
-        public string errorMessage { get; set; }
+        public int WebServiceMetricsRunId { get; set; }
+        public WebServiceMetricsRequest WebServiceMetricsRequestMeasured { get; set; }
+        public List<WebServiceMetricsResult> WebServiceMetricsResults { get; set; }
     }
 }

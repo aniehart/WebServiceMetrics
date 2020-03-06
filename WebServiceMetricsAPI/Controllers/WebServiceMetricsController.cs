@@ -25,7 +25,7 @@ namespace WebServiceMetricsAPI.Controllers
         {
             try
             {
-                var response = new List<WebServiceMetricsResponse>();
+                var response = new WebServiceMetricsResponse();
                 var metricsManager = new MetricsManager();
                 response = await metricsManager.RunMetrics(request);
                 return Content(JsonConvert.SerializeObject(response), "application/json");
