@@ -7,17 +7,17 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace WebServiceMetricsAPI.Controllers
 {
+    using System.Collections.Generic;
+
     [Route("api/[controller]")]
     [ApiController]
     public class WebServiceMetricsController : ControllerBase
     {
-        // POST api/values
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] WebServiceMetricsRequest request)
+        public async Task<ActionResult<WebServiceMetricsResponse>> Post([FromBody] WebServiceMetricsRequest request)
         {
             try
             {
-                var response = new WebServiceMetricsResponse();
                 var metricsManager = new MetricsManager();
                 return Content(JsonConvert.SerializeObject(await metricsManager.RunMetrics(request)), "application/json");
             }
@@ -27,16 +27,18 @@ namespace WebServiceMetricsAPI.Controllers
             }
         }
 
-        // PUT api/values/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpGet]
+        public ActionResult<List<WebServiceMetricsRunDto>> Get()
         {
-        }
-
-        // DELETE api/values/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
+            try
+            {
+                var metricsManager = new MetricsManager();
+                return Content(JsonConvert.SerializeObject(metricsManager.GetMetricRuns()), "application/json");
+            }
+            catch (Exception ex)
+            {
+                return this.BadRequest(ex.Message);
+            }           
         }
     }
 }

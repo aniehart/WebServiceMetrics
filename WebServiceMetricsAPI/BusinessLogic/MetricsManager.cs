@@ -8,6 +8,7 @@ using System.Text;
 using WebServiceMetricsAPI.Entities;
 using WebServiceMetricsAPI.Repositories;
 using System.Threading;
+using System.Linq;
 
 namespace WebServiceMetricsAPI.BusinessLogic
 {
@@ -15,8 +16,10 @@ namespace WebServiceMetricsAPI.BusinessLogic
     {
         public async Task<WebServiceMetricsResponse> RunMetrics(WebServiceMetricsRequest request)
         {
-            var response = new WebServiceMetricsResponse();
-            response.WebServiceMetricsRequestMeasured = request;
+            var response = new WebServiceMetricsResponse
+            {
+                WebServiceMetricsRequestMeasured = request
+            };
 
             var metricsRunEntity = new MetricsRun()
             {
@@ -45,6 +48,22 @@ namespace WebServiceMetricsAPI.BusinessLogic
 
             return response;
         }
+
+        public List<WebServiceMetricsRunDto> GetMetricRuns()
+        {
+            using (var repository = new MetricsRepository())
+            {
+                return repository.GetMetricsRuns()
+                                 .Select(x => new WebServiceMetricsRunDto()
+                                 {
+                                     MetricRunId = x.MetricRunId,
+                                     NumberOfRequestsToSend = x.NumberOfRequestsToSend,
+                                     RequestBody = x.RequestBody,
+                                     RequestUrl = x.RequestUrl
+                                 })
+                                 .ToList();
+            }
+        }
         private static async Task MeasureRequest(SemaphoreSlim semaphore, WebServiceMetricsRequest request, WebServiceMetricsResponse response, int metricRunId)
         {
             try
@@ -70,14 +89,14 @@ namespace WebServiceMetricsAPI.BusinessLogic
                     await repository.SaveMetricsResult(metricsResultEntity);
                 }
 
-                response.WebServiceMetricsResults.Add(new WebServiceMetricsResult
+                response.WebServiceMetricsResults.Add(new WebServiceMetricsResultDto
                 {
                     TimeElapsedInMilliseconds = metricsResultEntity.TimeElapsedInMilliseconds.ToString()
                 });
             }
             catch (Exception ex)
             {
-               response.WebServiceMetricsResults.Add(new WebServiceMetricsResult()
+               response.WebServiceMetricsResults.Add(new WebServiceMetricsResultDto()
                {
                    ErrorMessage = ex.Message
                });

@@ -1,6 +1,8 @@
 ﻿using System.Threading.Tasks;
 using WebServiceMetricsAPI.DataAccess;
 using WebServiceMetricsAPI.Entities;
+using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebServiceMetricsAPI.Repositories
 {
@@ -38,6 +40,11 @@ namespace WebServiceMetricsAPI.Repositories
             await this.Context.SaveChangesAsync();
 
             return await this.Context.MetricsResults.FindAsync(metricsResultEntity.MetricsResultId);
+        }
+
+        public IQueryable<MetricsRun> GetMetricsRuns()
+        {
+            return this.Context.Set<MetricsRun>().AsNoTracking();
         }
     }
 }
