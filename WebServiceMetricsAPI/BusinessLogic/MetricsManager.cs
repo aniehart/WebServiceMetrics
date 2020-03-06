@@ -41,7 +41,7 @@ namespace WebServiceMetricsAPI.BusinessLogic
                 for(int i = 0; i < request.NumberOfRequestsToSend; i++) 
                 {
                     await semaphore.WaitAsync();
-                    tasks.Add(MeasureRequest(semaphore, request, response, metricsRunEntity.MetricRunId));
+                    tasks.Add(MeasureRequest(semaphore, request, response));
                 }
                 await Task.WhenAll(tasks);
             }
@@ -64,7 +64,7 @@ namespace WebServiceMetricsAPI.BusinessLogic
                                  .ToList();
             }
         }
-        private static async Task MeasureRequest(SemaphoreSlim semaphore, WebServiceMetricsRequest request, WebServiceMetricsResponse response, int metricRunId)
+        private static async Task MeasureRequest(SemaphoreSlim semaphore, WebServiceMetricsRequest request, WebServiceMetricsResponse response)
         {
             try
             {
@@ -78,7 +78,7 @@ namespace WebServiceMetricsAPI.BusinessLogic
 
                 var metricsResultEntity = new MetricsResult()
                 {
-                    MetricsRunId = metricRunId,
+                    MetricsRunId = response.WebServiceMetricsRunId,
                     TimeElapsedInMilliseconds = (int)sw.ElapsedMilliseconds,
                     Result = wsResponse.StatusCode.ToString()
                 };
